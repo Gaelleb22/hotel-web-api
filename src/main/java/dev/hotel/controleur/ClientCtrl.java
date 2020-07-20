@@ -1,5 +1,8 @@
 package dev.hotel.controleur;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,9 +21,14 @@ public class ClientCtrl {
 	@Autowired ClientRepository clientRepository;
 	
 	@RequestMapping(method = RequestMethod.GET)
-	public Page<Client> findClient(@RequestParam("start") Integer start, @RequestParam("size") Integer size){
+	public List<Client> findClient(@RequestParam("start") Integer start, @RequestParam("size") Integer size){
 		Page<Client> clients = clientRepository.findAll(PageRequest.of(start, size));
-		return clients;
+		
+		List<Client> liste = new ArrayList();
+		for(Client client : clients) {
+			liste.add(client);
+		}
+		return liste;
 	}
 
 }
