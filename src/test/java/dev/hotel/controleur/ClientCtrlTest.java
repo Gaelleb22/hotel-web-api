@@ -14,6 +14,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -57,6 +58,9 @@ public class ClientCtrlTest {
 		Optional<Client> client = Optional.of(clients.get(2));
 		Mockito.when(clientRepository.findByUuid(UUID.fromString("747c41b7-f164-43f7-86ad-6a42f47c6120"))).thenReturn(client);
 		
+		Client clientCreer = new Client();
+		Mockito.when(clientRepository.save(clientCreer)).thenReturn(clientCreer);
+		
 	}
 	
 	@Test
@@ -97,6 +101,18 @@ public class ClientCtrlTest {
 		.andExpect(MockMvcResultMatchers.status().isNotFound())
 		.andExpect(MockMvcResultMatchers.content().string("Client non trouvé"));
 		
+	}
+	
+	@Test
+	void creerClient() throws Exception{
+		String param = "{ \"nom\":\"Au bois Dormant\", \"prenoms\":\"Aurore\"}";
+		
+		mockMvc.perform(MockMvcRequestBuilders.post("/clients")
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.content(param)
+				/*.param("nom", "Au bois Dormant").param("prenoms", "Aurore")*/)
+			.andExpect(MockMvcResultMatchers.status().isOk());
 	}
 
 }
