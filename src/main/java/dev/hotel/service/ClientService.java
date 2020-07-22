@@ -40,7 +40,7 @@ public class ClientService {
 
 
 	public Optional<Client> findByUuid(UUID uuid) {
-		return clientRepository.findByUuid(uuid);
+		return clientRepository.findById(uuid);
 	}
 
 }
