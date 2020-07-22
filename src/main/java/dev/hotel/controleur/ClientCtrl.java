@@ -28,8 +28,7 @@ import dev.hotel.service.ClientService;
 @RequestMapping("/clients")
 public class ClientCtrl {
 	
-	@Autowired ClientRepository clientRepository;
-	
+	@Autowired
 	private ClientService clientService;
 
 	@RequestMapping(method = RequestMethod.GET)
@@ -38,24 +37,21 @@ public class ClientCtrl {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("erreur de paramètres");
 		}
 		
-		return ResponseEntity.status(HttpStatus.OK).body(clientRepository.findAll(PageRequest.of(start, size)).toList());
+		return ResponseEntity.status(HttpStatus.OK).body(clientService.findAll(start, size));
 	}
 	
-	@RequestMapping(path = "/{uuid}", method = RequestMethod.GET)
-	public ResponseEntity<?> findClientByUUID(@PathVariable String uuid) {
-
-        int dash1 = uuid.indexOf('-', 0);
-        int dash2 = uuid.indexOf('-', dash1 + 1);
-        int dash3 = uuid.indexOf('-', dash2 + 1);
-        int dash4 = uuid.indexOf('-', dash3 + 1);
-        int dash5 = uuid.indexOf('-', dash4 + 1);
-
-        if (uuid.length()>36 || dash4 < 0 || dash5 >= 0) {
-        	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Uuid invalide");
-        }
+	@RequestMapping(path = "/{uuidString}", method = RequestMethod.GET)
+	public ResponseEntity<?> findClientByUUID(@PathVariable String uuidString) {
         
+		UUID uuid = null;
+		try{
+			uuid = UUID.fromString(uuidString);
+		} catch(IllegalArgumentException e) {
+			new IllegalArgumentException (e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Uuid invalide");
+		}
         
-		Optional<Client> opt = clientRepository.findByUuid(UUID.fromString(uuid));
+		Optional<Client> opt = clientService.findByUuid(uuid);
 		if(opt.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client non trouvé");
 		}

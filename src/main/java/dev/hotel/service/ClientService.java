@@ -1,7 +1,12 @@
 package dev.hotel.service;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import javax.transaction.Transactional;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import dev.hotel.entite.Client;
@@ -17,6 +22,7 @@ public class ClientService {
 		this.clientRepository = clientRepository;
 	}
 	
+	
 	@Transactional
 	public Client creer(String nom, String prenoms) {
 		
@@ -25,6 +31,16 @@ public class ClientService {
 		Client clientSauvegarde = this.clientRepository.save(client);
 		
 		return clientSauvegarde;
+	}
+
+
+	public List<Client> findAll(Integer start, Integer size) {
+		return clientRepository.findAll(PageRequest.of(start, size)).toList();
+	}
+
+
+	public Optional<Client> findByUuid(UUID uuid) {
+		return clientRepository.findByUuid(uuid);
 	}
 
 }

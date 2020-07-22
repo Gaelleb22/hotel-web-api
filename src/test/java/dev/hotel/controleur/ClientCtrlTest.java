@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import dev.hotel.entite.Client;
 import dev.hotel.repository.ClientRepository;
+import dev.hotel.service.ClientService;
 
 @WebMvcTest(ClientCtrl.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -30,9 +31,8 @@ public class ClientCtrlTest {
 	@Autowired
 	MockMvc mockMvc;
 	
-	
 	@MockBean
-	ClientRepository clientRepository;
+	private ClientService clientService;
 	
 	@BeforeEach
 	void setUp() {
@@ -51,25 +51,23 @@ public class ClientCtrlTest {
 		clients.add(client3);
 		
 		//mock test findClientTest()
-		Page<Client> p = new PageImpl<>(clients);
-		Mockito.when(clientRepository.findAll(PageRequest.of(0, 1))).thenReturn(p);
+		Mockito.when(clientService.findAll(0, 3)).thenReturn(clients);
 		
 		//mock test findClientByUUIDTestCorrect()
 		Optional<Client> client = Optional.of(clients.get(2));
-		Mockito.when(clientRepository.findByUuid(UUID.fromString("747c41b7-f164-43f7-86ad-6a42f47c6120"))).thenReturn(client);
-		
-		Client clientCreer = new Client();
-		Mockito.when(clientRepository.save(clientCreer)).thenReturn(clientCreer);
+		Mockito.when(clientService.findByUuid(UUID.fromString("747c41b7-f164-43f7-86ad-6a42f47c6120"))).thenReturn(client);
 		
 	}
 	
 	@Test
 	void findClientTest() throws Exception{
 		
-		mockMvc.perform(MockMvcRequestBuilders.get("/clients?start=0&size=1"))
+		mockMvc.perform(MockMvcRequestBuilders.get("/clients?start=0&size=3"))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].nom").isNotEmpty())
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].nom").value("Odd"));
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].nom").value("Odd"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[1].nom").value("Lourson"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[2].prenoms").value("Ran"));
 		
 	}
 	
@@ -104,15 +102,38 @@ public class ClientCtrlTest {
 	}
 	
 	@Test
-	void creerClient() throws Exception{
+	void creerClientTestOk() throws Exception{
+		
+		Client clientCreer = new Client();
+		clientCreer.setNom("Au bois Dormant");
+		clientCreer.setPrenoms("Aurore");
+		clientCreer.setUuid(UUID.fromString("747c41b7-f164-43f7-86ad-6a42f47c5320"));
+		Mockito.when(clientService.creer("Au bois Dormant", "Aurore")).thenReturn(clientCreer);
 		String param = "{ \"nom\":\"Au bois Dormant\", \"prenoms\":\"Aurore\"}";
 		
-		mockMvc.perform(MockMvcRequestBuilders.post("/clients")
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON)
-				.content(param)
-				/*.param("nom", "Au bois Dormant").param("prenoms", "Aurore")*/)
-			.andExpect(MockMvcResultMatchers.status().isOk());
+		mockMvc.perform(MockMvcRequestBuilders.post("/clients").contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON).content(param))
+			.andExpect(MockMvcResultMatchers.status().isOk())
+			.andExpect(MockMvcResultMatchers.jsonPath("$.nom").value("Au bois Dormant"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$.prenoms").value("Aurore"));
+	}
+	
+	@Test
+	void creerClientTestNomManquant() throws Exception{
+		String param = "{ \"nom\":, \"prenoms\":\"Aurore\"}";
+		
+		mockMvc.perform(MockMvcRequestBuilders.post("/clients").contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON).content(param))
+			.andExpect(MockMvcResultMatchers.status().isBadRequest());
+	}
+	
+	@Test
+	void creerClientTestPrenomTropCourt() throws Exception{
+		String param = "{ \"nom\":\"Au bois Dormant\", \"prenoms\":\"A\"}";
+		
+		mockMvc.perform(MockMvcRequestBuilders.post("/clients").contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON).content(param))
+			.andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
 
 }
