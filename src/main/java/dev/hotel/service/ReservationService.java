@@ -39,6 +39,13 @@ public class ReservationService {
 	}
 
 
+	/**Méthode pour creer une réservation et la sauvegarder
+	 * @param dateDebut
+	 * @param dateFin
+	 * @param clientUuid
+	 * @param chambresUuid
+	 * @return
+	 */
 	@Transactional
 	public Reservation creer(LocalDate dateDebut, LocalDate dateFin, UUID clientUuid, List<UUID> chambresUuid) {
 		Optional<Client> client = clientService.findByUuid(clientUuid);
@@ -63,8 +70,7 @@ public class ReservationService {
 		
 		
 		Reservation reservation = new Reservation(dateDebut, dateFin, client.get(), chambres);
-		Reservation sauvegarde = this.reservationRepository.save(reservation);
-		return sauvegarde;
+		return this.reservationRepository.save(reservation);
 	}
 
 }

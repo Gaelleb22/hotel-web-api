@@ -10,6 +10,10 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * @author formation
+ *
+ */
 public class CreerReservationDto {
 	
 	@NotNull
@@ -27,6 +31,12 @@ public class CreerReservationDto {
     @JsonProperty("chambres")
     private List<UUID> chambresUuid = new ArrayList<>();
 
+	/**Constructeur
+	 * @param dateDebut
+	 * @param dateFin
+	 * @param clientUuid
+	 * @param chambresUuid
+	 */
 	public CreerReservationDto(LocalDate dateDebut, LocalDate dateFin, UUID clientUuid, List<UUID> chambresUuid) {
 		super();
 		this.dateDebut = dateDebut;
